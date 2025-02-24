@@ -17,3 +17,19 @@ MovingAvg AS (
 SELECT visited_on, amount, average_amount
 FROM MovingAvg
 ORDER BY visited_on;
+
+
+
+-- better method 
+SELECT 
+    visited_on,
+    ROUND(SUM(amount) OVER (ORDER BY visited_on RANGE INTERVAL 6 DAY PRECEDING), 2) AS amount,
+    ROUND(AVG(amount) OVER (ORDER BY visited_on RANGE INTERVAL 6 DAY PRECEDING), 2) AS average_amount
+FROM (
+    SELECT visited_on, COUNT(DISTINCT customer_id) AS customer_count,
+    SUM(amount) as amount
+    FROM Customer
+    GROUP BY visited_on
+) AS subq
+ORDER BY visited_on
+LIMIT 100 OFFSET 6;
